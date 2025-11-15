@@ -15,6 +15,7 @@ import {
   DollarSign
 } from 'lucide-react';
 import { adminService } from '../../services/adminService';
+import { API_BASE_URL } from '../../config/api';
 
 const AdminDashboard = () => {
   const [dashboardData, setDashboardData] = useState(null);
@@ -55,7 +56,7 @@ const AdminDashboard = () => {
       if (res && res.fallback) return;
     } catch (error) {
       console.error('Export error:', error);
-      const directUrl = `http://localhost:8000/api/admin/export?type=${type}&format=${format}`;
+      const directUrl = `${API_BASE_URL}/admin/export?type=${type}&format=${format}`;
       try {
         window.open(directUrl, '_blank');
         return;

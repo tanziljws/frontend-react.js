@@ -15,6 +15,7 @@ import {
   Menu
 } from 'lucide-react';
 import { adminService } from '../../services/adminService';
+import { API_BASE_URL } from '../../config/api';
 
 const AdminParticipants = () => {
   const [participants, setParticipants] = useState([]);
@@ -39,11 +40,11 @@ const AdminParticipants = () => {
       setLoading(true);
       
       // Fetch participants data
-      const participantsResponse = await fetch('http://localhost:8000/api/admin/participants');
+      const participantsResponse = await fetch(`${API_BASE_URL}/admin/participants`);
       const participantsData = await participantsResponse.json();
       
       // Fetch statistics
-      const statsResponse = await fetch('http://localhost:8000/api/admin/participants/statistics');
+      const statsResponse = await fetch(`${API_BASE_URL}/admin/participants/statistics`);
       const statsData = await statsResponse.json();
       
       console.log('Participants data:', participantsData);

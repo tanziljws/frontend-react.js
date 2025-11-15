@@ -1,7 +1,5 @@
 import axios from 'axios';
-
-// Base URL untuk Laravel API
-const API_BASE_URL = 'http://localhost:8000/api';
+import { API_BASE_URL } from '../config/api';
 
 // Buat instance axios dengan konfigurasi default
 const api = axios.create({

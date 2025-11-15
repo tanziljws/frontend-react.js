@@ -5,6 +5,7 @@ import { Card, CardContent } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import AdminSidebar from '../../components/admin/AdminSidebar';
+import { API_BASE_URL } from '../../config/api';
 
 function AdminMessages() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -25,7 +26,7 @@ function AdminMessages() {
       setLoading(true);
       const token = localStorage.getItem('token');
       
-      let url = `http://127.0.0.1:8000/api/admin/messages?page=${currentPage}`;
+      let url = `${API_BASE_URL}/admin/messages?page=${currentPage}`;
       if (filter !== 'all') url += `&status=${filter}`;
       if (search) url += `&search=${encodeURIComponent(search)}`;
 
@@ -70,7 +71,7 @@ function AdminMessages() {
       };
       if (token) headers['Authorization'] = `Bearer ${token}`;
       
-      const response = await fetch(`http://127.0.0.1:8000/api/admin/messages/${id}/mark-read`, {
+      const response = await fetch(`${API_BASE_URL}/admin/messages/${id}/mark-read`, {
         method: 'POST',
         headers
       });
@@ -94,7 +95,7 @@ function AdminMessages() {
       };
       if (token) headers['Authorization'] = `Bearer ${token}`;
       
-      const response = await fetch(`http://127.0.0.1:8000/api/admin/messages/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/admin/messages/${id}`, {
         method: 'DELETE',
         headers
       });

@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// Base URL backend Laravel
-const API_BASE_URL = 'http://127.0.0.1:8000/api';
+// Base URL backend Laravel - menggunakan environment variable atau fallback ke Railway
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://laravel-event-app-production-447f.up.railway.app/api';
 
 // Create axios instance
 const api = axios.create({
