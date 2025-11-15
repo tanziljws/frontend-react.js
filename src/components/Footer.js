@@ -16,10 +16,10 @@ function Footer() {
               Platform manajemen event & sertifikat untuk sekolah dan komunitas.
             </p>
             <div className="mt-3 flex items-center gap-3 text-gray-500">
-              <a href="#" aria-label="Instagram" className="hover:text-gray-700"><Instagram className="w-4 h-4" /></a>
-              <a href="#" aria-label="Facebook" className="hover:text-gray-700"><Facebook className="w-4 h-4" /></a>
-              <a href="#" aria-label="Twitter" className="hover:text-gray-700"><Twitter className="w-4 h-4" /></a>
-              <a href="#" aria-label="YouTube" className="hover:text-gray-700"><Youtube className="w-4 h-4" /></a>
+              <a href="https://instagram.com" aria-label="Instagram" className="hover:text-gray-700"><Instagram className="w-4 h-4" /></a>
+              <a href="https://facebook.com" aria-label="Facebook" className="hover:text-gray-700"><Facebook className="w-4 h-4" /></a>
+              <a href="https://twitter.com" aria-label="Twitter" className="hover:text-gray-700"><Twitter className="w-4 h-4" /></a>
+              <a href="https://youtube.com" aria-label="YouTube" className="hover:text-gray-700"><Youtube className="w-4 h-4" /></a>
             </div>
           </div>
 
@@ -36,9 +36,9 @@ function Footer() {
           <div>
             <div className="text-xs font-semibold tracking-wider text-gray-500">RESOURCES</div>
             <ul className="mt-3 space-y-2 text-sm text-gray-700">
-              <li><a href="#" className="hover:text-gray-900">Career</a></li>
-              <li><a href="#" className="hover:text-gray-900">Blog</a></li>
-              <li><a href="#" className="hover:text-gray-900">Legal</a></li>
+              <li><a href="/career" className="hover:text-gray-900">Career</a></li>
+              <li><a href="/blog" className="hover:text-gray-900">Blog</a></li>
+              <li><a href="/legal" className="hover:text-gray-900">Legal</a></li>
             </ul>
           </div>
 

@@ -3,8 +3,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { wishlistService } from '../services/wishlistService';
 import { Card, CardContent } from './ui/card';
-import { Heart, Calendar, MapPin, Trash2 } from 'lucide-react';
-import { resolveMediaUrl } from '../utils/media';
+import { Heart, Calendar, MapPin } from 'lucide-react';
 
 export default function EmbeddedWishlist() {
   const [wishlist, setWishlist] = useState([]);

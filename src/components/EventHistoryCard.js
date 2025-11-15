@@ -18,7 +18,7 @@ import {
 import { userService } from '../services/userService';
 
 const EventHistoryCard = ({ eventData }) => {
-  const { event, attendance, certificate, registration_date, overall_status, registration_id } = eventData;
+  const { event, attendance, certificate, registration_date, overall_status } = eventData;
 
   // Handle certificate download
   const handleDownloadCertificate = async (e) => {

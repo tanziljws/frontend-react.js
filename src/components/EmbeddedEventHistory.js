@@ -9,7 +9,7 @@ import EventHistoryCard from './EventHistoryCard';
 // Compact version of EventHistory to be embedded inside Profile page
 export default function EmbeddedEventHistory() {
   const [events, setEvents] = useState([]);
-  const [statistics, setStatistics] = useState({});
+  const [statistics] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
