@@ -49,12 +49,17 @@ export function AuthProvider({ children }) {
       const response = await authService.login(email, password);
       console.log('✅ Login response:', response);
       
-      // Verify that we got token and user in response
+      // Verify that we got token and user in response (strict validation)
       if (!response || !response.token || !response.user) {
-        console.error('❌ Invalid login response:', response);
+        console.error('❌ Invalid login response - missing token or user:', {
+          hasResponse: !!response,
+          hasToken: !!response?.token,
+          hasUser: !!response?.user,
+          response: response
+        });
         return {
           success: false,
-          error: 'Login gagal: Response tidak valid'
+          error: response?.message || 'Login gagal: Response tidak valid'
         };
       }
       
@@ -63,11 +68,11 @@ export function AuthProvider({ children }) {
       const savedUser = authService.getCurrentUser();
       console.log('👤 Saved user from localStorage:', savedUser);
       
-      if (savedUser) {
+      if (savedUser && savedUser.id) {
         setUser(savedUser);
         console.log('✅ User set in context:', savedUser);
         return { success: true };
-      } else if (response.user) {
+      } else if (response.user && response.user.id) {
         // Fallback: jika localStorage belum tersimpan, gunakan response
         console.warn('⚠️ Using response.user as fallback');
         setUser(response.user);
@@ -77,15 +82,16 @@ export function AuthProvider({ children }) {
         }
         return { success: true };
       } else {
-        console.error('❌ No user data found in response or localStorage');
+        console.error('❌ No valid user data found in response or localStorage');
         return {
           success: false,
           error: 'Login gagal: Data user tidak ditemukan'
         };
       }
     } catch (error) {
-      console.error('❌ Login error:', error);
+      console.error('❌ Login error caught:', error);
       const errorMessage = error.response?.data?.message || error.message || 'Login gagal';
+      console.error('❌ Error message:', errorMessage);
       return { 
         success: false, 
         error: errorMessage

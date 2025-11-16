@@ -32,22 +32,30 @@ function Login() {
     setError('');
 
     try {
+      console.log('🚀 Starting login process...');
       const result = await login(formData.email, formData.password);
+      console.log('📦 Login result:', result);
       
-      // Hanya redirect jika login benar-benar berhasil
+      // Validasi ketat: hanya redirect jika result.success === true (strict check)
       if (result && result.success === true) {
+        console.log('✅ Login berhasil, redirecting to /events');
         // Redirect langsung ke halaman events setelah login
         navigate('/events', { replace: true });
       } else {
-        // Tampilkan error dan tetap di halaman login
+        // Tampilkan error dan tetap di halaman login (TIDAK redirect)
+        console.log('❌ Login gagal, result:', result);
         const errorMessage = result?.error || 'Login gagal. Silakan coba lagi.';
         setError(errorMessage);
+        // Pastikan tidak ada redirect
+        return;
       }
     } catch (err) {
-      // Tangkap error dan tampilkan pesan
+      // Tangkap error dan tampilkan pesan (TIDAK redirect)
+      console.error('❌ Login exception:', err);
       const errorMessage = err?.response?.data?.message || err?.message || 'Terjadi kesalahan saat login';
       setError(errorMessage);
-      console.error('Login error:', err);
+      // Pastikan tidak ada redirect
+      return;
     } finally {
       setLoading(false);
     }
