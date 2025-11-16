@@ -101,17 +101,24 @@ function Register() {
     }
 
     try {
+      console.log('🚀 Starting registration...', formData);
       const result = await register(formData);
+      console.log('📦 Registration result:', result);
+      
       if (result.success) {
+        console.log('✅ Registration successful!');
         setSuccess(result.message);
         setTimeout(() => {
-          navigate('/verify-email', { state: { userId: result.user_id } });
+          navigate('/verify-email', { state: { email: result.email } });
         }, 2000);
       } else {
+        console.error('❌ Registration failed:', result.error);
         setError(result.error);
       }
     } catch (err) {
-      setError('Terjadi kesalahan saat mendaftar');
+      console.error('❌ Registration exception:', err);
+      const errorMessage = err?.response?.data?.message || err?.message || 'Terjadi kesalahan saat mendaftar';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

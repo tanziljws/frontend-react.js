@@ -111,7 +111,7 @@ export function AuthProvider({ children }) {
       return { 
         success: true, 
         message: response.message,
-        user_id: response.user_id
+        email: response.email // Tidak ada user_id lagi, pakai email
       };
     } catch (error) {
       return { 
@@ -126,10 +126,24 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
-  const verifyEmail = async (userId, code) => {
+  const verifyEmail = async (code) => {
     try {
-      const response = await authService.verifyEmail(userId, code);
-      return { success: true, message: response.message };
+      const response = await authService.verifyEmail(code);
+      
+      // Jika verifikasi berhasil, response akan berisi token dan user
+      if (response.token && response.user) {
+        // Simpan token dan user ke localStorage
+        localStorage.setItem('auth_token', response.token);
+        localStorage.setItem('user', JSON.stringify(response.user));
+        setUser(response.user);
+      }
+      
+      return { 
+        success: true, 
+        message: response.message,
+        user: response.user,
+        token: response.token
+      };
     } catch (error) {
       return { 
         success: false, 

@@ -18,8 +18,8 @@ function VerifyEmail() {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Get user_id from navigation state
-  const userId = location.state?.userId;
+  // Get email from navigation state (optional, untuk display)
+  const email = location.state?.email;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -27,24 +27,26 @@ function VerifyEmail() {
     setError('');
     setSuccess('');
 
-    if (!userId) {
-      setError('User ID tidak ditemukan. Silakan daftar ulang.');
+    if (!code || code.length !== 6) {
+      setError('Kode OTP harus 6 digit angka.');
       setLoading(false);
       return;
     }
 
     try {
-      const result = await verifyEmail(userId, code);
+      const result = await verifyEmail(code);
       if (result.success) {
-        setSuccess(result.message);
+        setSuccess(result.message || 'Email berhasil diverifikasi!');
+        // Auto login sudah dilakukan di AuthContext, redirect ke events
         setTimeout(() => {
-          navigate('/login');
+          navigate('/events', { replace: true });
         }, 2000);
       } else {
-        setError(result.error);
+        setError(result.error || 'Verifikasi gagal. Silakan coba lagi.');
       }
     } catch (err) {
-      setError('Terjadi kesalahan saat verifikasi');
+      const errorMessage = err?.response?.data?.message || err?.message || 'Terjadi kesalahan saat verifikasi';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -55,18 +57,13 @@ function VerifyEmail() {
   };
 
   const handleResendOtp = async () => {
-    if (!userId) {
-      setError('User ID tidak ditemukan. Silakan daftar ulang.');
-      return;
-    }
-
     setResendLoading(true);
     setResendSuccess('');
     setError('');
 
     try {
-      console.log('🔄 Resending OTP for user_id:', userId);
-      const data = await authService.resendOtp(userId);
+      console.log('🔄 Resending OTP...');
+      const data = await authService.resendOtp();
       console.log('📧 Resend OTP response:', data);
 
       setResendSuccess(data.message || 'Kode OTP baru telah dikirim ke email Anda. Silakan periksa inbox email Anda.');
@@ -111,6 +108,9 @@ function VerifyEmail() {
               <h2 className="text-2xl font-bold text-gray-800">Verifikasi Email</h2>
               <p className="text-gray-600 text-sm">
                 Masukkan kode OTP yang telah dikirim ke email Anda
+                {email && (
+                  <span className="block mt-1 font-medium text-blue-600">{email}</span>
+                )}
               </p>
             </div>
           </div>
@@ -174,7 +174,7 @@ function VerifyEmail() {
               <button 
                 type="button" 
                 onClick={handleResendOtp}
-                disabled={resendLoading || !userId}
+                disabled={resendLoading}
                 className="text-blue-600 hover:text-blue-700 font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {resendLoading ? 'Mengirim...' : 'Kirim ulang'}

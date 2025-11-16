@@ -10,6 +10,7 @@ const api = axios.create({
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   },
+  withCredentials: true, // Enable untuk session cookies
 });
 
 // Request interceptor untuk menambahkan token

@@ -3,14 +3,21 @@ import api from '../config/api';
 export const authService = {
   // Register user
   register: async (userData) => {
-    const response = await api.post('/auth/register', userData);
-    return response.data;
+    console.log('📤 Sending register request to API...', userData);
+    try {
+      const response = await api.post('/auth/register', userData);
+      console.log('📥 Register API response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('❌ Register API error:', error);
+      console.error('❌ Error response:', error.response?.data);
+      throw error;
+    }
   },
 
-  // Verify email with OTP
-  verifyEmail: async (userId, code) => {
+  // Verify email with OTP (tidak perlu userId, pakai session)
+  verifyEmail: async (code) => {
     const response = await api.post('/auth/verify-email', {
-      user_id: userId,
       code: code
     });
     return response.data;
@@ -112,11 +119,9 @@ export const authService = {
     return response.data;
   },
 
-  // Resend OTP for email verification
-  resendOtp: async (userId) => {
-    const response = await api.post('/auth/resend-otp', {
-      user_id: userId
-    });
+  // Resend OTP for email verification (tidak perlu userId, pakai session)
+  resendOtp: async () => {
+    const response = await api.post('/auth/resend-otp');
     return response.data;
   }
 };
