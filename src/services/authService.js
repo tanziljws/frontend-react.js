@@ -23,9 +23,19 @@ export const authService = {
       password
     });
     
-    if (response.data.token) {
+    if (response.data.token && response.data.user) {
+      // Simpan token
       localStorage.setItem('auth_token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
+      // Simpan user data dengan error handling
+      try {
+        const userData = JSON.stringify(response.data.user);
+        localStorage.setItem('user', userData);
+        console.log('User data saved to localStorage:', response.data.user);
+      } catch (error) {
+        console.error('Error saving user to localStorage:', error);
+      }
+    } else {
+      console.warn('Login response missing token or user:', response.data);
     }
     
     return response.data;
@@ -39,8 +49,19 @@ export const authService = {
 
   // Get current user from localStorage
   getCurrentUser: () => {
-    const user = localStorage.getItem('user');
-    return user ? JSON.parse(user) : null;
+    try {
+      const user = localStorage.getItem('user');
+      if (user) {
+        const parsedUser = JSON.parse(user);
+        console.log('User loaded from localStorage:', parsedUser);
+        return parsedUser;
+      }
+    } catch (error) {
+      console.error('Error parsing user from localStorage:', error);
+      // Clear corrupted data
+      localStorage.removeItem('user');
+    }
+    return null;
   },
 
   // Check if user is authenticated

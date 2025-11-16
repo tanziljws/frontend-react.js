@@ -13,20 +13,65 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     // Check if user is logged in on app start
-    const token = localStorage.getItem('auth_token');
-    const userData = authService.getCurrentUser();
-    if (token && userData) {
-      setUser(userData);
-    }
-    setLoading(false);
+    const checkAuth = async () => {
+      try {
+        const token = localStorage.getItem('auth_token');
+        const userData = authService.getCurrentUser();
+        
+        if (token && userData) {
+          // Verify token is still valid by making a test request
+          // For now, just set user if token and userData exist
+          setUser(userData);
+        } else {
+          // Clear any invalid data
+          if (token && !userData) {
+            localStorage.removeItem('auth_token');
+          }
+          if (userData && !token) {
+            localStorage.removeItem('user');
+          }
+        }
+      } catch (error) {
+        console.error('Error checking auth:', error);
+        // Clear invalid auth data
+        authService.logout();
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    checkAuth();
   }, []);
 
   const login = async (email, password) => {
     try {
+      console.log('🔐 Attempting login for:', email);
       const response = await authService.login(email, password);
-      setUser(response.user);
+      console.log('✅ Login response:', response);
+      
+      // authService.login() sudah menyimpan token dan user ke localStorage
+      // Ambil user dari localStorage untuk memastikan konsistensi
+      const savedUser = authService.getCurrentUser();
+      console.log('👤 Saved user from localStorage:', savedUser);
+      
+      if (savedUser) {
+        setUser(savedUser);
+        console.log('✅ User set in context:', savedUser);
+      } else if (response.user) {
+        // Fallback: jika localStorage belum tersimpan, gunakan response
+        console.warn('⚠️ Using response.user as fallback');
+        setUser(response.user);
+        // Coba simpan lagi
+        if (response.token) {
+          localStorage.setItem('user', JSON.stringify(response.user));
+        }
+      } else {
+        console.error('❌ No user data found in response or localStorage');
+      }
+      
       return { success: true };
     } catch (error) {
+      console.error('❌ Login error:', error);
       return { 
         success: false, 
         error: error.response?.data?.message || 'Login gagal' 
