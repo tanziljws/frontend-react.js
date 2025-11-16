@@ -57,6 +57,8 @@ export function AuthProvider({ children }) {
           hasUser: !!response?.user,
           response: response
         });
+        // Pastikan user state TIDAK di-set jika login gagal
+        setUser(null);
         return {
           success: false,
           error: response?.message || 'Login gagal: Response tidak valid'
@@ -83,6 +85,8 @@ export function AuthProvider({ children }) {
         return { success: true };
       } else {
         console.error('❌ No valid user data found in response or localStorage');
+        // Pastikan user state TIDAK di-set jika login gagal
+        setUser(null);
         return {
           success: false,
           error: 'Login gagal: Data user tidak ditemukan'
@@ -92,6 +96,8 @@ export function AuthProvider({ children }) {
       console.error('❌ Login error caught:', error);
       const errorMessage = error.response?.data?.message || error.message || 'Login gagal';
       console.error('❌ Error message:', errorMessage);
+      // Pastikan user state TIDAK di-set jika login gagal
+      setUser(null);
       return { 
         success: false, 
         error: errorMessage
