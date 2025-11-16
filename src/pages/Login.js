@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/button';
@@ -15,9 +15,18 @@ function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Hanya redirect jika user benar-benar sudah login (punya id)
+  // Jangan redirect jika login gagal
+  useEffect(() => {
+    if (user && user.id) {
+      console.log('✅ User sudah login, redirecting to /events');
+      navigate('/events', { replace: true });
+    }
+  }, [user, navigate]);
 
   const handleChange = (e) => {
     setFormData({
