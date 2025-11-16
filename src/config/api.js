@@ -4,13 +4,16 @@ import axios from 'axios';
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://laravel-event-app-production-447f.up.railway.app/api';
 
 // Create axios instance
+// NOTE: withCredentials: false karena Railway Proxy mengeluarkan CORS wildcard (*)
+// yang tidak bisa di-override. Untuk session-based auth, perlu pakai custom domain
+// atau ubah ke token-based auth.
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   },
-  withCredentials: true, // Enable untuk session cookies
+  withCredentials: false, // Disabled karena Railway Proxy CORS conflict
 });
 
 // Request interceptor untuk menambahkan token
