@@ -33,14 +33,21 @@ function Login() {
 
     try {
       const result = await login(formData.email, formData.password);
-      if (result.success) {
+      
+      // Hanya redirect jika login benar-benar berhasil
+      if (result && result.success === true) {
         // Redirect langsung ke halaman events setelah login
         navigate('/events', { replace: true });
       } else {
-        setError(result.error);
+        // Tampilkan error dan tetap di halaman login
+        const errorMessage = result?.error || 'Login gagal. Silakan coba lagi.';
+        setError(errorMessage);
       }
     } catch (err) {
-      setError('Terjadi kesalahan saat login');
+      // Tangkap error dan tampilkan pesan
+      const errorMessage = err?.response?.data?.message || err?.message || 'Terjadi kesalahan saat login';
+      setError(errorMessage);
+      console.error('Login error:', err);
     } finally {
       setLoading(false);
     }
@@ -132,8 +139,23 @@ function Login() {
               )}
 
               {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-                  {error}
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm space-y-1">
+                  <div className="font-medium">⚠️ {error}</div>
+                  {error.includes('tidak terdaftar') && (
+                    <div className="text-red-600 text-xs mt-2 pt-2 border-t border-red-200">
+                      <p>💡 <strong>Tips:</strong> Belum punya akun? <Link to="/register" className="underline font-semibold hover:text-red-800">Daftar sekarang</Link> untuk membuat akun baru.</p>
+                    </div>
+                  )}
+                  {error.includes('belum terverifikasi') && (
+                    <div className="text-red-600 text-xs mt-2 pt-2 border-t border-red-200">
+                      <p>💡 <strong>Tips:</strong> Periksa inbox email Anda untuk kode OTP verifikasi. Pastikan juga memeriksa folder spam.</p>
+                    </div>
+                  )}
+                  {error.includes('Password salah') && (
+                    <div className="text-red-600 text-xs mt-2 pt-2 border-t border-red-200">
+                      <p>💡 <strong>Tips:</strong> Lupa password? <Link to="/forgot-password" className="underline font-semibold hover:text-red-800">Reset password</Link> untuk membuat password baru.</p>
+                    </div>
+                  )}
                 </div>
               )}
 

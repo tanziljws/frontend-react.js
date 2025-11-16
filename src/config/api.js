@@ -30,11 +30,17 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      // Token expired atau invalid
+    // Jangan redirect jika ini adalah request login (untuk menghindari loop)
+    const isLoginRequest = error.config?.url?.includes('/auth/login');
+    
+    if (error.response?.status === 401 && !isLoginRequest) {
+      // Token expired atau invalid (kecuali untuk login endpoint)
       localStorage.removeItem('auth_token');
       localStorage.removeItem('user');
-      window.location.href = '/login';
+      // Hanya redirect jika tidak di halaman login
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }

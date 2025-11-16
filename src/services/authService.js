@@ -18,27 +18,40 @@ export const authService = {
 
   // Login user
   login: async (email, password) => {
-    const response = await api.post('/auth/login', {
-      email,
-      password
-    });
-    
-    if (response.data.token && response.data.user) {
-      // Simpan token
-      localStorage.setItem('auth_token', response.data.token);
-      // Simpan user data dengan error handling
-      try {
-        const userData = JSON.stringify(response.data.user);
-        localStorage.setItem('user', userData);
-        console.log('User data saved to localStorage:', response.data.user);
-      } catch (error) {
-        console.error('Error saving user to localStorage:', error);
+    try {
+      const response = await api.post('/auth/login', {
+        email,
+        password
+      });
+      
+      // Check if response is successful and has token/user
+      if (response.data && response.data.token && response.data.user) {
+        // Simpan token
+        localStorage.setItem('auth_token', response.data.token);
+        // Simpan user data dengan error handling
+        try {
+          const userData = JSON.stringify(response.data.user);
+          localStorage.setItem('user', userData);
+          console.log('User data saved to localStorage:', response.data.user);
+        } catch (error) {
+          console.error('Error saving user to localStorage:', error);
+        }
+        return response.data;
+      } else {
+        // No token/user means login failed
+        throw new Error(response.data?.message || 'Login gagal');
       }
-    } else {
-      console.warn('Login response missing token or user:', response.data);
+    } catch (error) {
+      // Clear any existing auth data on error
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('user');
+      
+      // Re-throw error with message from backend
+      const errorMessage = error.response?.data?.message || error.message || 'Login gagal';
+      const customError = new Error(errorMessage);
+      customError.response = error.response;
+      throw customError;
     }
-    
-    return response.data;
   },
 
   // Logout user

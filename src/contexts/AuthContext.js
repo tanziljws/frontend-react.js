@@ -49,6 +49,15 @@ export function AuthProvider({ children }) {
       const response = await authService.login(email, password);
       console.log('✅ Login response:', response);
       
+      // Verify that we got token and user in response
+      if (!response || !response.token || !response.user) {
+        console.error('❌ Invalid login response:', response);
+        return {
+          success: false,
+          error: 'Login gagal: Response tidak valid'
+        };
+      }
+      
       // authService.login() sudah menyimpan token dan user ke localStorage
       // Ambil user dari localStorage untuk memastikan konsistensi
       const savedUser = authService.getCurrentUser();
@@ -57,6 +66,7 @@ export function AuthProvider({ children }) {
       if (savedUser) {
         setUser(savedUser);
         console.log('✅ User set in context:', savedUser);
+        return { success: true };
       } else if (response.user) {
         // Fallback: jika localStorage belum tersimpan, gunakan response
         console.warn('⚠️ Using response.user as fallback');
@@ -65,16 +75,20 @@ export function AuthProvider({ children }) {
         if (response.token) {
           localStorage.setItem('user', JSON.stringify(response.user));
         }
+        return { success: true };
       } else {
         console.error('❌ No user data found in response or localStorage');
+        return {
+          success: false,
+          error: 'Login gagal: Data user tidak ditemukan'
+        };
       }
-      
-      return { success: true };
     } catch (error) {
       console.error('❌ Login error:', error);
+      const errorMessage = error.response?.data?.message || error.message || 'Login gagal';
       return { 
         success: false, 
-        error: error.response?.data?.message || 'Login gagal' 
+        error: errorMessage
       };
     }
   };
