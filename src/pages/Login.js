@@ -31,36 +31,61 @@ function Login() {
     setLoading(true);
     setError('');
 
+    // Flag untuk mencegah redirect
+    let shouldRedirect = false;
+
     try {
       console.log('🚀 Starting login process...');
       const result = await login(formData.email, formData.password);
       console.log('📦 Login result:', result);
+      console.log('📦 result type:', typeof result);
+      console.log('📦 result.success:', result?.success);
+      console.log('📦 result.hasOwnProperty("success"):', result?.hasOwnProperty?.('success'));
       
       // Validasi SANGAT ketat: hanya redirect jika result.success === true (strict check)
       // Pastikan result ada, result.success ada, dan result.success === true
-      if (result && result.hasOwnProperty('success') && result.success === true) {
-        console.log('✅ Login berhasil, redirecting to /events');
-        // Redirect langsung ke halaman events setelah login
-        navigate('/events', { replace: true });
-        return; // Pastikan return setelah redirect
+      const isSuccess = result && 
+                       typeof result === 'object' && 
+                       result.hasOwnProperty('success') && 
+                       result.success === true;
+      
+      console.log('📦 isSuccess:', isSuccess);
+      
+      if (isSuccess) {
+        console.log('✅ Login berhasil, akan redirect ke /events');
+        shouldRedirect = true;
       } else {
         // Tampilkan error dan tetap di halaman login (TIDAK redirect)
         console.log('❌ Login gagal, result:', result);
         console.log('❌ result.success:', result?.success);
+        console.log('❌ TIDAK AKAN REDIRECT - tetap di halaman login');
         const errorMessage = result?.error || result?.message || 'Login gagal. Silakan coba lagi.';
         setError(errorMessage);
         setLoading(false); // Stop loading
+        shouldRedirect = false;
         // TIDAK ADA REDIRECT - user tetap di halaman login
         return;
       }
     } catch (err) {
       // Tangkap error dan tampilkan pesan (TIDAK redirect)
       console.error('❌ Login exception:', err);
+      console.error('❌ TIDAK AKAN REDIRECT - tetap di halaman login');
       const errorMessage = err?.response?.data?.message || err?.message || 'Terjadi kesalahan saat login';
       setError(errorMessage);
       setLoading(false); // Stop loading
+      shouldRedirect = false;
       // TIDAK ADA REDIRECT - user tetap di halaman login
       return;
+    } finally {
+      // Hanya redirect jika flag shouldRedirect = true
+      if (shouldRedirect) {
+        console.log('✅ Redirecting to /events...');
+        setLoading(false);
+        navigate('/events', { replace: true });
+      } else {
+        console.log('❌ TIDAK redirect - tetap di halaman login');
+        setLoading(false);
+      }
     }
   };
 
