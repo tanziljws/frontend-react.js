@@ -390,15 +390,33 @@ function Events() {
   };
 
   const getEventImageUrl = (event) => {
-    // Prioritize flyer_url or image_url if available
-    if (event.flyer_url) return event.flyer_url;
-    if (event.image_url) return event.image_url;
+    // Filter out Unsplash URLs - they're unreliable
+    const isValidUrl = (url) => {
+      if (!url) return false;
+      // Reject Unsplash URLs
+      if (url.includes('unsplash.com') || url.includes('images.unsplash')) {
+        return false;
+      }
+      return true;
+    };
+    
+    // Prioritize flyer_url or image_url if available and valid
+    if (event.flyer_url && isValidUrl(event.flyer_url)) return event.flyer_url;
+    if (event.image_url && isValidUrl(event.image_url)) return event.image_url;
+    
+    // Check if event has fotos from fotos table, use first foto
+    if (event.fotos && Array.isArray(event.fotos) && event.fotos.length > 0) {
+      const firstFoto = event.fotos[0];
+      if (firstFoto && firstFoto.url && isValidUrl(firstFoto.url)) {
+        return firstFoto.url;
+      }
+    }
     
     // Check if flyer_path or image_path exists and is not '0' or empty
     const flyerPath = event.flyer_path || event.image_path || '';
     if (flyerPath && flyerPath !== '0') {
       const url = resolveMediaUrl(flyerPath);
-      if (url) return url;
+      if (url && isValidUrl(url)) return url;
     }
     
     // Fallback to category-based placeholder
@@ -407,14 +425,15 @@ function Events() {
 
   const placeholderByCategory = (category) => {
     const normalizedCategory = normalizeCategory(category);
+    // Using placeholder.com service for reliable placeholder images
     const placeholders = {
-      teknologi: 'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=800',
-      seni_budaya: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?q=80&w=800',
-      olahraga: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?q=80&w=800',
-      akademik: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0a?q=80&w=800',
-      sosial: 'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?q=80&w=800'
+      teknologi: 'https://via.placeholder.com/800x600/3b82f6/ffffff?text=Technology+Event',
+      seni_budaya: 'https://via.placeholder.com/800x600/8b5cf6/ffffff?text=Arts+%26+Culture',
+      olahraga: 'https://via.placeholder.com/800x600/10b981/ffffff?text=Sports+Event',
+      akademik: 'https://via.placeholder.com/800x600/f59e0b/ffffff?text=Academic+Event',
+      sosial: 'https://via.placeholder.com/800x600/ec4899/ffffff?text=Social+Event'
     };
-    return placeholders[normalizedCategory] || 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?q=80&w=800';
+    return placeholders[normalizedCategory] || 'https://via.placeholder.com/800x600/6b7280/ffffff?text=Event';
   };
 
   const formatDate = (dateString) => {
@@ -543,8 +562,13 @@ function Events() {
                     className="w-full h-full object-cover pointer-events-none"
                     draggable="false"
                     onError={(e) => {
-                      console.error('❌ Banner image failed to load!');
-                      console.error('Attempted URL:', e.target.src);
+                      const img = e.currentTarget;
+                      // Prevent infinite loop and set fallback
+                      if (!img.dataset.fallbackUsed) {
+                        img.dataset.fallbackUsed = 'true';
+                        // Use gradient placeholder for banners
+                        img.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="400" viewBox="0 0 800 400"><defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:%233b82f6;stop-opacity:1" /><stop offset="100%" style="stop-color:%238b5cf6;stop-opacity:1" /></linearGradient></defs><rect width="800" height="400" fill="url(%23grad)"/></svg>';
+                      }
                     }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent pointer-events-none" />
@@ -642,8 +666,16 @@ function Events() {
                     alt={event.title}
                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                     onError={(e) => {
-                      console.error('Image failed to load:', e.target.src);
-                      e.target.src = placeholderByCategory(event.category);
+                      const img = e.currentTarget;
+                      // Prevent infinite loop by checking if already using placeholder
+                      if (img.src && !img.src.includes('via.placeholder.com') && !img.dataset.fallbackUsed) {
+                        img.dataset.fallbackUsed = 'true';
+                        const placeholder = placeholderByCategory(event.category);
+                        // Only change if different from current src
+                        if (img.src !== placeholder) {
+                          img.src = placeholder;
+                        }
+                      }
                     }}
                   />
                   

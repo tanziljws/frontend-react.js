@@ -161,20 +161,6 @@ function Home() {
                       <Link to="/events">Lihat Event</Link>
                     </Button>
                   </motion.div>
-                  <motion.div
-                    whileHover={{ scale: 1.05, y: -2 }}
-                    whileTap={{ scale: 0.95 }}
-                    transition={{ duration: 0.2 }}
-                    className="w-full sm:w-auto"
-                  >
-                    <Button
-                      asChild
-                      variant="outline"
-                      className="w-full sm:w-auto border border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-800 px-5 sm:px-6 py-2.5 font-semibold rounded-md text-[14px]"
-                    >
-                      <Link to="/about">Tentang Kami</Link>
-                    </Button>
-                  </motion.div>
                 </motion.div>
               </div>
               
@@ -533,14 +519,41 @@ function Home() {
                         {/* Event Image */}
                         <div className="relative h-48 overflow-hidden">
                           <img
-                            src={
-                              event.flyer_url || event.image_url || 
-                              (event.image_path || event.flyer_path) && (event.image_path !== '0' && event.flyer_path !== '0')
-                                ? resolveMediaUrl(event.image_path || event.flyer_path)
-                                : `https://images.unsplash.com/photo-${1492684223066 + index}-043259c2d91e?q=80&w=800&auto=format&fit=crop`
-                            }
+                            src={(() => {
+                              // Filter out Unsplash URLs
+                              const isValidUrl = (url) => {
+                                if (!url) return false;
+                                if (url.includes('unsplash.com') || url.includes('images.unsplash')) {
+                                  return false;
+                                }
+                                return true;
+                              };
+                              
+                              if (event.flyer_url && isValidUrl(event.flyer_url)) return event.flyer_url;
+                              if (event.image_url && isValidUrl(event.image_url)) return event.image_url;
+                              if (event.fotos && Array.isArray(event.fotos) && event.fotos.length > 0 && event.fotos[0]?.url && isValidUrl(event.fotos[0].url)) {
+                                return event.fotos[0].url;
+                              }
+                              const flyerPath = event.image_path || event.flyer_path || '';
+                              if (flyerPath && flyerPath !== '0') {
+                                const url = resolveMediaUrl(flyerPath);
+                                if (url && isValidUrl(url)) return url;
+                              }
+                              return 'https://via.placeholder.com/800x600/6b7280/ffffff?text=Event';
+                            })()}
                             alt={event.title || 'Event'}
                             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                            onError={(e) => {
+                              const img = e.currentTarget;
+                              // Prevent infinite loop
+                              if (!img.dataset.fallbackUsed) {
+                                img.dataset.fallbackUsed = 'true';
+                                const placeholder = 'https://via.placeholder.com/800x600/6b7280/ffffff?text=Event';
+                                if (img.src !== placeholder) {
+                                  img.src = placeholder;
+                                }
+                              }
+                            }}
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                         </div>

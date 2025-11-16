@@ -37,13 +37,13 @@ export default function EmbeddedWishlist() {
 
   const placeholderByCategory = (category) => {
     const placeholders = {
-      teknologi: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&h=300&fit=crop',
-      seni_budaya: 'https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=400&h=300&fit=crop',
-      olahraga: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=400&h=300&fit=crop',
-      akademik: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=400&h=300&fit=crop',
-      sosial: 'https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=400&h=300&fit=crop',
+      teknologi: 'https://via.placeholder.com/400x300/3b82f6/ffffff?text=Technology',
+      seni_budaya: 'https://via.placeholder.com/400x300/8b5cf6/ffffff?text=Arts',
+      olahraga: 'https://via.placeholder.com/400x300/10b981/ffffff?text=Sports',
+      akademik: 'https://via.placeholder.com/400x300/f59e0b/ffffff?text=Academic',
+      sosial: 'https://via.placeholder.com/400x300/ec4899/ffffff?text=Social',
     };
-    return placeholders[category] || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=300&fit=crop';
+    return placeholders[category] || 'https://via.placeholder.com/400x300/6b7280/ffffff?text=Event';
   };
 
   if (loading) {

@@ -48,8 +48,14 @@ export function resolveMediaUrl(input) {
   const needsStoragePrefix = (
     path.startsWith('flyers/') ||
     path.startsWith('/flyers/') ||
+    path.startsWith('banners/') ||
+    path.startsWith('/banners/') ||
+    path.startsWith('fotos/') ||
+    path.startsWith('/fotos/') ||
     path.startsWith('certificates/') ||
     path.startsWith('/certificates/') ||
+    path.startsWith('cert_templates/') ||
+    path.startsWith('/cert_templates/') ||
     path.startsWith('images/') ||
     path.startsWith('/images/') ||
     path.startsWith('uploads/') ||

@@ -22,13 +22,13 @@ function EventDetail() {
   
   const getPlaceholderByCategory = (category) => {
     const placeholders = {
-      teknologi: 'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1200',
-      seni_budaya: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?q=80&w=1200',
-      olahraga: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?q=80&w=1200',
-      akademik: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0a?q=80&w=1200',
-      sosial: 'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?q=80&w=1200'
+      teknologi: 'https://via.placeholder.com/1200x600/3b82f6/ffffff?text=Technology+Event',
+      seni_budaya: 'https://via.placeholder.com/1200x600/8b5cf6/ffffff?text=Arts+%26+Culture',
+      olahraga: 'https://via.placeholder.com/1200x600/10b981/ffffff?text=Sports+Event',
+      akademik: 'https://via.placeholder.com/1200x600/f59e0b/ffffff?text=Academic+Event',
+      sosial: 'https://via.placeholder.com/1200x600/ec4899/ffffff?text=Social+Event'
     };
-    return placeholders[category] || 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?q=80&w=1200';
+    return placeholders[category] || 'https://via.placeholder.com/1200x600/6b7280/ffffff?text=Event';
   };
   
   const heroUrl = React.useMemo(() => {
@@ -272,6 +272,17 @@ function EventDetail() {
                   alt={event?.title}
                   className="w-full h-auto object-cover"
                   style={{ maxHeight: '420px' }}
+                  onError={(e) => {
+                    const img = e.currentTarget;
+                    // Prevent infinite loop
+                    if (!img.dataset.fallbackUsed) {
+                      img.dataset.fallbackUsed = 'true';
+                      const placeholder = getPlaceholderByCategory(event?.category);
+                      if (img.src !== placeholder) {
+                        img.src = placeholder;
+                      }
+                    }
+                  }}
                 />
               ) : (
                 <div className="w-full h-96 bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-500 flex items-center justify-center">

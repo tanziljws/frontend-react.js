@@ -14,25 +14,15 @@ const brands = [
 export default function PartnersCarousel() {
   const scrollerRef = useRef(null);
   const hoverRef = useRef(false);
-  const triedFallback = {};
   const dataUriFallback = {
     // Minimal brand-like placeholders (last-resort)
-    amazonaws: 'data:image/svg+xml;utf8,\
-      <svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">\
-        <rect width="256" height="256" fill="white"/>\
-        <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle"\
-         font-family="Arial, Helvetica, sans-serif" font-size="90" fill="%23FF9900">aws</text>\
-      </svg>' ,
-    microsoft: 'data:image/svg+xml;utf8,\
-      <svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">\
-        <rect width="256" height="256" fill="white"/>\
-        <g transform="translate(48,48)">\
-          <rect width="72" height="72" fill="%23F25022"/>\
-          <rect x="88" width="72" height="72" fill="%237A7A7A"/>\
-          <rect y="88" width="72" height="72" fill="%23F3C300"/>\
-          <rect x="88" y="88" width="72" height="72" fill="%2300A4EF"/>\
-        </g>\
-      </svg>'
+    google: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256"><rect width="256" height="256" fill="white"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-size="80" fill="%234285F4">G</text></svg>',
+    amazonaws: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256"><rect width="256" height="256" fill="white"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-size="70" fill="%23FF9900">AWS</text></svg>',
+    microsoft: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256"><rect width="256" height="256" fill="white"/><g transform="translate(48,48)"><rect width="72" height="72" fill="%23F25022"/><rect x="88" width="72" height="72" fill="%237A7A7A"/><rect y="88" width="72" height="72" fill="%23F3C300"/><rect x="88" y="88" width="72" height="72" fill="%2300A4EF"/></g></svg>',
+    cloudflare: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256"><rect width="256" height="256" fill="white"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-size="60" fill="%23F38020">CF</text></svg>',
+    vercel: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256"><rect width="256" height="256" fill="white"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-size="70" fill="%23000000">▲</text></svg>',
+    github: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256"><rect width="256" height="256" fill="white"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-size="80" fill="%23000000">GH</text></svg>',
+    mongodb: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256"><rect width="256" height="256" fill="white"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-size="60" fill="%23F2C94C">MDB</text></svg>'
   };
   const sources = (slug, color) => [
     `https://cdn.simpleicons.org/${slug}/${color}`,
@@ -67,17 +57,41 @@ export default function PartnersCarousel() {
     return () => cancelAnimationFrame(rafId);
   }, []);
   const onImgError = (e, slug, color) => {
-    const idx = (triedFallback[slug] ?? 0) + 1;
-    triedFallback[slug] = idx;
+    const img = e.currentTarget;
+    // Prevent infinite loop
+    if (img.dataset.errorCount) {
+      const errorCount = parseInt(img.dataset.errorCount, 10);
+      if (errorCount >= 3) {
+        // Already tried all fallbacks, use data URI
+        if (dataUriFallback[slug]) {
+          img.src = dataUriFallback[slug];
+          img.style.filter = 'none';
+        } else {
+          img.style.display = 'none';
+        }
+        return;
+      }
+      img.dataset.errorCount = (errorCount + 1).toString();
+    } else {
+      img.dataset.errorCount = '1';
+    }
+    
+    const currentSrc = img.src;
     const list = sources(slug, color);
-    if (idx < list.length) {
-      e.currentTarget.src = list[idx];
-      // If the source is monochrome SVG, keep brand-like visibility
-      if (idx > 0) {
-        e.currentTarget.style.filter = 'none';
+    const currentIdx = list.findIndex(url => currentSrc.includes(url.split('/').pop()) || currentSrc === url);
+    const nextIdx = currentIdx >= 0 ? currentIdx + 1 : 1;
+    
+    if (nextIdx < list.length) {
+      img.src = list[nextIdx];
+      if (nextIdx > 0) {
+        img.style.filter = 'none';
       }
     } else if (dataUriFallback[slug]) {
-      e.currentTarget.src = dataUriFallback[slug];
+      img.src = dataUriFallback[slug];
+      img.style.filter = 'none';
+    } else {
+      // Ultimate fallback: hide broken image
+      img.style.display = 'none';
     }
   };
 
@@ -106,13 +120,12 @@ export default function PartnersCarousel() {
           onMouseLeave={() => (hoverRef.current = false)}
         >
           {[...brands, ...brands].map((b, idx) => (
-            <div key={b.slug} className="shrink-0 flex items-center justify-center h-24 w-40">
+            <div key={`${b.slug}-${idx}`} className="shrink-0 flex items-center justify-center h-24 w-40">
               <img
                 src={sources(b.slug, b.color)[0]}
                 alt={b.name}
                 className="h-16 w-auto object-contain drop-shadow-sm bg-white"
                 loading="lazy"
-                crossOrigin="anonymous"
                 referrerPolicy="no-referrer"
                 onError={(e) => onImgError(e, b.slug, b.color)}
               />
