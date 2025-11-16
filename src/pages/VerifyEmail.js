@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { authService } from '../services/authService';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { ArrowLeft, Mail, CheckCircle } from 'lucide-react';
@@ -10,6 +11,8 @@ function VerifyEmail() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendSuccess, setResendSuccess] = useState('');
 
   const { verifyEmail } = useAuth();
   const navigate = useNavigate();
@@ -49,6 +52,46 @@ function VerifyEmail() {
 
   const handleBackToRegister = () => {
     navigate('/register');
+  };
+
+  const handleResendOtp = async () => {
+    if (!userId) {
+      setError('User ID tidak ditemukan. Silakan daftar ulang.');
+      return;
+    }
+
+    setResendLoading(true);
+    setResendSuccess('');
+    setError('');
+
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'https://laravel-event-app-production-447f.up.railway.app/api'}/auth/resend-otp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          user_id: userId
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setResendSuccess(data.message || 'Kode OTP baru telah dikirim ke email Anda. Silakan periksa inbox email Anda.');
+        setError('');
+      } else {
+        setError(data.message || 'Gagal mengirim ulang OTP. Silakan coba lagi.');
+        setResendSuccess('');
+      }
+    } catch (err) {
+      console.error('Error resending OTP:', err);
+      setError('Terjadi kesalahan saat mengirim ulang OTP. Silakan coba lagi.');
+      setResendSuccess('');
+    } finally {
+      setResendLoading(false);
+    }
   };
 
   return (
@@ -96,6 +139,14 @@ function VerifyEmail() {
             </div>
           )}
 
+          {/* Resend Success Message */}
+          {resendSuccess && (
+            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm flex items-center gap-2">
+              <CheckCircle className="w-4 h-4" />
+              {resendSuccess}
+            </div>
+          )}
+
           {/* Verify Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
@@ -131,9 +182,11 @@ function VerifyEmail() {
               Tidak menerima kode?{' '}
               <button 
                 type="button" 
-                className="text-blue-600 hover:text-blue-700 font-semibold transition-colors"
+                onClick={handleResendOtp}
+                disabled={resendLoading || !userId}
+                className="text-blue-600 hover:text-blue-700 font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Kirim ulang
+                {resendLoading ? 'Mengirim...' : 'Kirim ulang'}
               </button>
             </div>
           </form>

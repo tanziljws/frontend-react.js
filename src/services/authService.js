@@ -110,5 +110,13 @@ export const authService = {
     if (userId) payload.user_id = userId;
     const response = await api.post('/auth/reset-password', payload);
     return response.data;
+  },
+
+  // Resend OTP for email verification
+  resendOtp: async (userId) => {
+    const response = await api.post('/auth/resend-otp', {
+      user_id: userId
+    });
+    return response.data;
   }
 };
