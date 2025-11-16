@@ -65,29 +65,20 @@ function VerifyEmail() {
     setError('');
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'https://laravel-event-app-production-447f.up.railway.app/api'}/auth/resend-otp`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-          user_id: userId
-        })
-      });
+      console.log('🔄 Resending OTP for user_id:', userId);
+      const data = await authService.resendOtp(userId);
+      console.log('📧 Resend OTP response:', data);
 
-      const data = await response.json();
-
-      if (response.ok) {
-        setResendSuccess(data.message || 'Kode OTP baru telah dikirim ke email Anda. Silakan periksa inbox email Anda.');
-        setError('');
-      } else {
-        setError(data.message || 'Gagal mengirim ulang OTP. Silakan coba lagi.');
+      setResendSuccess(data.message || 'Kode OTP baru telah dikirim ke email Anda. Silakan periksa inbox email Anda.');
+      setError('');
+      // Clear success message after 5 seconds
+      setTimeout(() => {
         setResendSuccess('');
-      }
+      }, 5000);
     } catch (err) {
-      console.error('Error resending OTP:', err);
-      setError('Terjadi kesalahan saat mengirim ulang OTP. Silakan coba lagi.');
+      console.error('❌ Error resending OTP:', err);
+      const errorMessage = err?.response?.data?.message || err?.message || 'Terjadi kesalahan saat mengirim ulang OTP. Silakan coba lagi.';
+      setError(errorMessage);
       setResendSuccess('');
     } finally {
       setResendLoading(false);
